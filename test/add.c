@@ -8,12 +8,17 @@
 #include "syscall.h"
 
 int
-main()
-{
-  int result;
-  
-  result = Add(42, 23);
+main() {
+    int result;
+    int a;
+    char* x="abcd";
 
-  Halt();
-  /* not reached */
+    result = Add(42, 23);
+
+    a = Create("salam", 111);
+    Write(x, 4, a);
+
+
+    //Halt();
+    /* not reached */
 }

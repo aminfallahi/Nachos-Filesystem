@@ -34,6 +34,8 @@
 #define SC_ExecV	13
 #define SC_ThreadExit   14
 #define SC_ThreadJoin   15
+#define SC_Fork_POS   16 //modification
+#define SC_Wait_POS   17
 
 #define SC_Add		42
 
@@ -111,7 +113,7 @@ typedef int OpenFileId;
 /* Create a Nachos file, with name "name" */
 /* Note: Create does not open the file.   */
 /* Return 1 on success, negative error code on failure */
-int Create(char *name);
+int Create(char *name, int protection);
 
 /* Remove a Nachos file, with name "name" */
 int Remove(char *name);
@@ -119,7 +121,7 @@ int Remove(char *name);
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
  */
-OpenFileId Open(char *name);
+OpenFileId Open(char *name, int mode);  //mode 0=r 1=r 2=a
 
 /* Write "size" bytes from "buffer" to the open file. 
  * Return the number of bytes actually read on success.
@@ -173,6 +175,11 @@ int ThreadJoin(ThreadId id);
  * Deletes current thread and returns ExitCode to every waiting lokal thread.
  */
 void ThreadExit(int ExitCode);	
+
+// Program Assignment 2
+ThreadId Fork_POS(int func);
+
+void Wait_POS(ThreadId id);
 
 #endif /* IN_ASM */
 

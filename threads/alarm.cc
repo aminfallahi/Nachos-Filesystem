@@ -20,9 +20,11 @@
 //		occur at random, instead of fixed, intervals.
 //----------------------------------------------------------------------
 
-Alarm::Alarm(bool doRandom)
+Alarm::Alarm(bool doRandom, int quantum)
 {
-    timer = new Timer(doRandom, this);
+	timer = new Timer(doRandom, this);
+	timeSlice = quantum;
+	timeCount = 0;
 }
 
 //----------------------------------------------------------------------
@@ -49,7 +51,9 @@ Alarm::CallBack()
     Interrupt *interrupt = kernel->interrupt;
     MachineStatus status = interrupt->getStatus();
     
-    if (status != IdleMode) {
-	interrupt->YieldOnReturn();
-    }
+	timeCount++;
+
+	if (status != IdleMode && timeCount * TimerTicks % timeSlice == 0) {
+		interrupt->YieldOnReturn();
+	}
 }

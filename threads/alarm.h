@@ -25,7 +25,7 @@
 // The following class defines a software alarm clock. 
 class Alarm : public CallBackObj {
   public:
-    Alarm(bool doRandomYield);	// Initialize the timer, and callback 
+	Alarm(bool doRandomYield, int quantum);	// Initialize the timer, and callback 
 				// to "toCall" every time slice.
     ~Alarm() { delete timer; }
     
@@ -33,6 +33,11 @@ class Alarm : public CallBackObj {
                                 // this method is not yet implemented
 
   private:
+
+	int timeSlice;
+
+	int timeCount;
+
     Timer *timer;		// the hardware timer device
 
     void CallBack();		// called when the hardware

@@ -11,6 +11,7 @@
 #include "copyright.h"
 #include "debug.h"
 #include "kernel.h"
+#include "list.h"
 
 extern Kernel *kernel;
 extern Debug *debug;

@@ -18,6 +18,9 @@
 #include "alarm.h"
 #include "filesys.h"
 #include "machine.h"
+#include "list.h"
+#include "bitmap.h"
+#include <map>
 
 class PostOfficeInput;
 class PostOfficeOutput;
@@ -26,47 +29,58 @@ class SynchConsoleOutput;
 class SynchDisk;
 
 class Kernel {
-  public:
+public:
     Kernel(int argc, char **argv);
-    				// Interpret command line arguments
-    ~Kernel();		        // deallocate the kernel
-    
-    void Initialize(); 		// initialize the kernel -- separated
-				// from constructor because 
-				// refers to "kernel" as a global
+    // Interpret command line arguments
+    ~Kernel(); // deallocate the kernel
 
-    void ThreadSelfTest();	// self test of threads and synchronization
+    void Initialize(); // initialize the kernel -- separated
+    // from constructor because 
+    // refers to "kernel" as a global
 
-    void ConsoleTest();         // interactive console self test
+    void ThreadSelfTest(); // self test of threads and synchronization
 
-    void NetworkTest();         // interactive 2-machine network test
-    
-// These are public for notational convenience; really, 
-// they're global variables used everywhere.
+    void ConsoleTest(); // interactive console self test
 
-    Thread *currentThread;	// the thread holding the CPU
-    Scheduler *scheduler;	// the ready list
-    Interrupt *interrupt;	// interrupt status
-    Statistics *stats;		// performance metrics
-    Alarm *alarm;		// the software alarm clock    
-    Machine *machine;           // the simulated CPU
+    void NetworkTest(); // interactive 2-machine network test
+
+    // These are public for notational convenience; really, 
+    // they're global variables used everywhere.
+
+    Thread *currentThread; // the thread holding the CPU
+    Scheduler *scheduler; // the ready list
+    Interrupt *interrupt; // interrupt status
+    Statistics *stats; // performance metrics
+    Alarm *alarm; // the software alarm clock    
+    Machine *machine; // the simulated CPU
     SynchConsoleInput *synchConsoleIn;
     SynchConsoleOutput *synchConsoleOut;
     SynchDisk *synchDisk;
-    FileSystem *fileSystem;     
+    FileSystem *fileSystem;
     PostOfficeInput *postOfficeIn;
     PostOfficeOutput *postOfficeOut;
 
-    int hostName;               // machine identifier
+    int hostName; // machine identifier
 
-  private:
-    bool randomSlice;		// enable pseudo-random time slicing
-    bool debugUserProg;         // single step user program
-    double reliability;         // likelihood messages are dropped
-    char *consoleIn;            // file to read console input from
-    char *consoleOut;           // file to send console output to
+    //page fault
+    OpenFile* swapSpace;
+    int swapSpace_counter;
+    List<TranslationEntry*>* FIFOEntryList;
+    Bitmap* freeMap;
+    
+    std::map<int,OpenFile*> *openFiles;
+    OpenFile *findOpenFileById(int);
+
+private:
+    //int quantum = 1;
+    int quantum = TimerTicks;
+    bool randomSlice; // enable pseudo-random time slicing
+    bool debugUserProg; // single step user program
+    double reliability; // likelihood messages are dropped
+    char *consoleIn; // file to read console input from
+    char *consoleOut; // file to send console output to
 #ifndef FILESYS_STUB
-    bool formatFlag;          // format the disk if this is true
+    bool formatFlag; // format the disk if this is true
 #endif
 };
 

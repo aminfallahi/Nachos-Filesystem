@@ -23,6 +23,8 @@
 #include "scheduler.h"
 #include "main.h"
 
+List<int>* Scheduler::finishedThread = new List<int>();
+
 //----------------------------------------------------------------------
 // Scheduler::Scheduler
 // 	Initialize the list of ready but not running threads.
@@ -104,6 +106,8 @@ void
 Scheduler::Run (Thread *nextThread, bool finishing)
 {
     Thread *oldThread = kernel->currentThread;
+
+    //cout<<oldThread->PID<<" is switching to "<<nextThread->PID<<endl;
     
     ASSERT(kernel->interrupt->getLevel() == IntOff);
 

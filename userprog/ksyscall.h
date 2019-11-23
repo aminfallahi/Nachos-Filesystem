@@ -12,8 +12,8 @@
 #define __USERPROG_KSYSCALL_H__ 
 
 #include "kernel.h"
-
-
+#include "thread.h"
+#include "list.h"
 
 
 void SysHalt()
