@@ -29,7 +29,6 @@
 #include "synchdisk.h"
 #include "main.h"
 
-
 //----------------------------------------------------------------------
 // FileHeader::Allocate
 // 	Initialize a fresh file header for a newly created file.
@@ -42,17 +41,18 @@
 //----------------------------------------------------------------------
 
 bool
-FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize) {
+FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize)
+{ 
     numBytes = fileSize;
-    numSectors = divRoundUp(fileSize, SectorSize);
+    numSectors  = divRoundUp(fileSize, SectorSize);
     if (freeMap->NumClear() < numSectors)
-        return FALSE; // not enough space
+	return FALSE;		// not enough space
 
     for (int i = 0; i < numSectors; i++) {
-        dataSectors[i] = freeMap->FindAndSet();
-        // since we checked that there was enough free space,
-        // we expect this to succeed
-        ASSERT(dataSectors[i] >= 0);
+	dataSectors[i] = freeMap->FindAndSet();
+	// since we checked that there was enough free space,
+	// we expect this to succeed
+	ASSERT(dataSectors[i] >= 0);
     }
     return TRUE;
 }
@@ -64,11 +64,12 @@ FileHeader::Allocate(PersistentBitmap *freeMap, int fileSize) {
 //	"freeMap" is the bit map of free disk sectors
 //----------------------------------------------------------------------
 
-void
-FileHeader::Deallocate(PersistentBitmap *freeMap) {
+void 
+FileHeader::Deallocate(PersistentBitmap *freeMap)
+{
     for (int i = 0; i < numSectors; i++) {
-        ASSERT(freeMap->Test((int) dataSectors[i])); // ought to be marked!
-        freeMap->Clear((int) dataSectors[i]);
+	ASSERT(freeMap->Test((int) dataSectors[i]));  // ought to be marked!
+	freeMap->Clear((int) dataSectors[i]);
     }
 }
 
@@ -80,8 +81,9 @@ FileHeader::Deallocate(PersistentBitmap *freeMap) {
 //----------------------------------------------------------------------
 
 void
-FileHeader::FetchFrom(int sector) {
-    kernel->synchDisk->ReadSector(sector, (char *) this);
+FileHeader::FetchFrom(int sector)
+{
+    kernel->synchDisk->ReadSector(sector, (char *)this);
 }
 
 //----------------------------------------------------------------------
@@ -92,8 +94,9 @@ FileHeader::FetchFrom(int sector) {
 //----------------------------------------------------------------------
 
 void
-FileHeader::WriteBack(int sector) {
-    kernel->synchDisk->WriteSector(sector, (char *) this);
+FileHeader::WriteBack(int sector)
+{
+    kernel->synchDisk->WriteSector(sector, (char *)this); 
 }
 
 //----------------------------------------------------------------------
@@ -107,8 +110,9 @@ FileHeader::WriteBack(int sector) {
 //----------------------------------------------------------------------
 
 int
-FileHeader::ByteToSector(int offset) {
-    return (dataSectors[offset / SectorSize]);
+FileHeader::ByteToSector(int offset)
+{
+    return(dataSectors[offset / SectorSize]);
 }
 
 //----------------------------------------------------------------------
@@ -117,7 +121,8 @@ FileHeader::ByteToSector(int offset) {
 //----------------------------------------------------------------------
 
 int
-FileHeader::FileLength() {
+FileHeader::FileLength()
+{
     return numBytes;
 }
 
@@ -128,30 +133,24 @@ FileHeader::FileLength() {
 //----------------------------------------------------------------------
 
 void
-FileHeader::Print() {
+FileHeader::Print()
+{
     int i, j, k;
     char *data = new char[SectorSize];
 
     printf("FileHeader contents.  File size: %d.  File blocks:\n", numBytes);
     for (i = 0; i < numSectors; i++)
-        printf("%d ", dataSectors[i]);
+	printf("%d ", dataSectors[i]);
     printf("\nFile contents:\n");
     for (i = k = 0; i < numSectors; i++) {
-        kernel->synchDisk->ReadSector(dataSectors[i], data);
+	kernel->synchDisk->ReadSector(dataSectors[i], data);
         for (j = 0; (j < SectorSize) && (k < numBytes); j++, k++) {
-            if ('\040' <= data[j] && data[j] <= '\176') // isprint(data[j])
-                printf("%c", data[j]);
+	    if ('\040' <= data[j] && data[j] <= '\176')   // isprint(data[j])
+		printf("%c", data[j]);
             else
-                printf("\\%x", (unsigned char) data[j]);
-        }
-        printf("\n");
+		printf("\\%x", (unsigned char)data[j]);
+	}
+        printf("\n"); 
     }
     delete [] data;
 }
-
-void FileHeader::chmod(int protection) {
-    r = protection / 100 == 0 ? false : true;
-    w = protection / 10 % 10 == 0 ? false : true;
-    x = protection % 10 == 0 ? false : true;   
-}
-

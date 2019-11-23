@@ -15,8 +15,6 @@
 
 #include "copyright.h"
 #include "filesys.h"
-#include "list.h"
-#include <map>
 
 #define UserStackSize		1024 	// increase this as necessary!
 
@@ -40,10 +38,6 @@ class AddrSpace {
     // to physical address _paddr_. _mode_
     // is 0 for Read, 1 for Write.
     ExceptionType Translate(unsigned int vaddr, unsigned int *paddr, int mode);
-
-    //page swap
-    TranslationEntry* getPageEntry(int PageNum) { return &pageTable[PageNum]; }
-    
 
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation

@@ -31,12 +31,8 @@ class Scheduler {
     void CheckToBeDestroyed();// Check if thread that had been
     				// running needs to be deleted
     void Print();		// Print contents of ready list
-
-    List<Thread*>* getReadyList() { return readyList; }
     
     // SelfTest for scheduler is implemented in class Thread
-
-    static List<int>* finishedThread;
     
   private:
     List<Thread *> *readyList;  // queue of threads that are ready to run,

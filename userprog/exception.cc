@@ -48,240 +48,62 @@
 //	is in machine.h.
 //----------------------------------------------------------------------
 
-
-// void Exit_POS(ThreadId id) { //only could exit currentThread
-// if (kernel->currentThread->PID != id) {
-// cerr << "Invalid Thread ID isn't the current Thread, can't exit it!" << endl;
-// kernel->currentThread->Finish();
-// }
-// else {
-// cout<<"Thread with PID "<<kernel->currentThread->PID<<" is going to finish!"<<endl;
-// kernel->currentThread->Finish();
-// }
-// }
-
 void
-ExceptionHandler(ExceptionType which) {
+ExceptionHandler(ExceptionType which)
+{
     int type = kernel->machine->ReadRegister(2);
 
     DEBUG(dbgSys, "Received Exception " << which << " type: " << type << "\n");
 
     switch (which) {
-            // Task1
-        case SyscallException:
-            switch (type) {
-                case SC_Exit:
-                {
-                    DEBUG(dbgSys, "Exit: Thread ID" << kernel->machine->ReadRegister(4) << "\n");
-                    int status = (int) kernel->machine->ReadRegister(4);
-                    // ThreadId id = (int)kernel->currentThread->PID;
-                    // Exit_POS(id);
-                    //printf("Thread %s exited with status: %d\n",currentThread->getName().c_str(),status);
-                    cout << "Thread with PID " << kernel->currentThread->PID << " is going to finish! with status: " << status << endl;
-                    kernel->currentThread->Finish();
-                    ASSERTNOTREACHED();
-                }
-                    break;
+    case SyscallException:
+      switch(type) {
+      case SC_Halt:
+	DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
 
-                case SC_Halt:
-                {
-                    DEBUG(dbgSys, "Shutdown, initiated by user program.\n");
-                    SysHalt();
-                    ASSERTNOTREACHED();
-                }
-                    break;
+	SysHalt();
 
-                case SC_Add:
-                {
-                    DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
-                    /* Process SysAdd Systemcall*/
-                    int result;
-                    result = SysAdd(/* int op1 */(int) kernel->machine->ReadRegister(4),
-                            /* int op2 */(int) kernel->machine->ReadRegister(5));
-                    DEBUG(dbgSys, "Add returning with " << result << "\n");
-                    /* Prepare Result */
-                    kernel->machine->WriteRegister(2, (int) result);
-                    /* Modify return point */
-                    {
-                        /* set previous programm counter (debugging only)*/
-                        kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
+	ASSERTNOTREACHED();
+	break;
 
-                        /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                        kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+      case SC_Add:
+	DEBUG(dbgSys, "Add " << kernel->machine->ReadRegister(4) << " + " << kernel->machine->ReadRegister(5) << "\n");
+	
+	/* Process SysAdd Systemcall*/
+	int result;
+	result = SysAdd(/* int op1 */(int)kernel->machine->ReadRegister(4),
+			/* int op2 */(int)kernel->machine->ReadRegister(5));
 
-                        /* set next programm counter for brach execution */
-                        kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-                    }
-                    return;
-                    ASSERTNOTREACHED();
-                }
-                    break;
+	DEBUG(dbgSys, "Add returning with " << result << "\n");
+	/* Prepare Result */
+	kernel->machine->WriteRegister(2, (int)result);
+	
+	/* Modify return point */
+	{
+	  /* set previous programm counter (debugging only)*/
+	  kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
 
-                case SC_Create:
-                {
-                    int name = kernel->machine->ReadRegister(4);
-                    int protection = kernel->machine->ReadRegister(5);
+	  /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
+	  kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
+	  
+	  /* set next programm counter for brach execution */
+	  kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg)+4);
+	}
 
-                    //reading file name from memory
-                    char* fileName = (char*) malloc(100 * sizeof (char));
-                    for (int i = 0;; i++) {
-                        kernel->machine->ReadMem(name + i, 1, (int*) &fileName[i]);
-                        if (fileName[i] == '\0')
-                            break;
-                    }
+	return;
+	
+	ASSERTNOTREACHED();
 
-                    kernel->fileSystem->Create(fileName, 10, protection);
+	break;
 
-                    delete fileName;
-
-                    {
-                        /* set previous programm counter (debugging only)*/
-                        kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-                        /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                        kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-                        /* set next programm counter for brach execution */
-                        kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-                    }
-                    return;
-                    ASSERTNOTREACHED();
-                }
-                    break;
-
-
-                case SC_Open:
-                {
-                    int name = kernel->machine->ReadRegister(4);
-                    int mode = kernel->machine->ReadRegister(5);
-
-                    //reading file name from memory
-                    char* fileName = (char*) malloc(100 * sizeof (char));
-                    for (int i = 0;; i++) {
-                        kernel->machine->ReadMem(name + i, 1, (int*) &fileName[i]);
-                        if (fileName[i] == '\0')
-                            break;
-                    }
-
-                    OpenFile* of = kernel->fileSystem->Open(fileName, mode);
-
-                    if (of == NULL) {
-                        printf("\nCannot open file\n");
-                    }
-
-                    delete fileName;
-
-                    {
-                        /* set previous programm counter (debugging only)*/
-                        kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-                        /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                        kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-                        /* set next programm counter for brach execution */
-                        kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-                    }
-                    return;
-                    ASSERTNOTREACHED();
-                }
-                    break;
-
-                case SC_Write:
-                {
-                    int addr = kernel->machine->ReadRegister(4);
-                    int size = kernel->machine->ReadRegister(5);
-                    int fileId = kernel->machine->ReadRegister(6);
-                    int i, buffer;
-                    
-                    for (i = 0; i < size; i++) {
-                        kernel->machine->ReadMem(addr, 1, &buffer);
-                        addr++;
-                    }
-                    
-                    OpenFile *file=kernel->findOpenFileById(fileId);
-                    file->Write("abcd",4);
-
-
-                    {
-                        /* set previous programm counter (debugging only)*/
-                        kernel->machine->WriteRegister(PrevPCReg, kernel->machine->ReadRegister(PCReg));
-
-                        /* set programm counter to next instruction (all Instructions are 4 byte wide)*/
-                        kernel->machine->WriteRegister(PCReg, kernel->machine->ReadRegister(PCReg) + 4);
-
-                        /* set next programm counter for brach execution */
-                        kernel->machine->WriteRegister(NextPCReg, kernel->machine->ReadRegister(PCReg) + 4);
-                    }
-                    return;
-                    ASSERTNOTREACHED();
-                }
-                    break;
-
-                default:
-                    cerr << "Unexpected system call " << type << "\n";
-                    break;
-            }
-            break;
-            //page fault
-        case PageFaultException:
-        {
-            cout << "Page Fault Exception!" << endl;
-            //Fetch the virtual address where has PageFaultException
-            int pageFaultA = (int) kernel->machine->ReadRegister(BadVAddrReg);
-            //Fetch the virtual page number of the thread's pageTable
-            int pageFaultPN = (int) pageFaultA / PageSize;
-            //Check the free physical page number in main memory	
-            int PPN = kernel->freeMap->FindAndSet();
-            //Fetch the page fault entry of the currentThread
-            TranslationEntry* pageEntry = kernel->currentThread->space->getPageEntry(pageFaultPN);
-            if (PPN != -1) { //Free physical page
-                //Update the page entry
-                pageEntry->physicalPage = PPN;
-                pageEntry->valid = TRUE;
-
-                //Read data from swapSpace file and copy it into main memory
-                kernel->swapSpace->ReadAt(
-                        &(kernel->machine->mainMemory[PPN * PageSize]),
-                        PageSize, pageEntry->virtualPage * PageSize);
-
-                //Update FIFOEntryList, append the used physical page at the end of list
-                kernel->FIFOEntryList->Append(pageEntry);
-            } else { //No free physical page
-                //Fetch the evicted physical page from FIFOEntryList
-                TranslationEntry* evictedPage = kernel->FIFOEntryList->RemoveFront();
-                //Fetch the physical page number of the evictedPage
-                int PhysicalPN = evictedPage->physicalPage;
-
-                //Copy evicted physical page data from main memory into swapSpace file
-                kernel->swapSpace->WriteAt(
-                        &(kernel->machine->mainMemory[PhysicalPN * PageSize]),
-                        PageSize, evictedPage->virtualPage * PageSize);
-
-                //Update the evictedPage entry
-                evictedPage->physicalPage = -1;
-                evictedPage->valid = FALSE;
-
-                //Update the page entry
-                pageEntry->physicalPage = PhysicalPN;
-                pageEntry->valid = TRUE;
-
-                //Read data from swapSpace file and copy it into main memory
-                kernel->swapSpace->ReadAt(
-                        &(kernel->machine->mainMemory[PhysicalPN * PageSize]),
-                        PageSize, pageEntry->virtualPage * PageSize);
-
-                //Update FIFOEntryList, append the used physical page at the end of list
-                kernel->FIFOEntryList->Append(pageEntry);
-                cout << "No free physical page available! Swap VPN #" << pageEntry->virtualPage << " of thread with PID "
-                        << kernel->currentThread->PID << " for PPN #" << PhysicalPN << endl;
-            }
-            return;
-        }
-            break;
-
-        default:
-            cerr << "Unexpected user mode exception" << (int) which << "\n";
-            break;
+      default:
+	cerr << "Unexpected system call " << type << "\n";
+	break;
+      }
+      break;
+    default:
+      cerr << "Unexpected user mode exception" << (int)which << "\n";
+      break;
     }
     ASSERTNOTREACHED();
 }

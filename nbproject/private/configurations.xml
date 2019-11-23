@@ -67,6 +67,12 @@
         <in>add.c</in>
         <in>halt.c</in>
         <in>matmult.c</in>
+        <in>mprog1.c</in>
+        <in>mprog2.c</in>
+        <in>mprog3.c</in>
+        <in>prog1.c</in>
+        <in>prog2.c</in>
+        <in>prog3.c</in>
         <in>segments.c</in>
         <in>shell.c</in>
         <in>sort.c</in>
