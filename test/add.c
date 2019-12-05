@@ -10,10 +10,18 @@
 int
 main()
 {
-  int result;
+  int a;
+  char* h="abcdefg";
   
-  result = Add(42, 23);
+  Create("aaaaa",111,100);
+  a=Open("aaaaa",1);
+  Write("ABCD",4,a);
+  Seek(2,a);
+  //a=Open("salam",1);
+  //Read(h,4,a);
+  
+  //result = Add(42, 23);
 
-  Halt();
+  //Halt();
   /* not reached */
 }

@@ -43,6 +43,7 @@
 
 #include "machine.h"
 #include "addrspace.h"
+#include <map>
 
 // CPU register state to be saved on context switch.  
 // The x86 needs to save only a few registers, 
@@ -104,6 +105,11 @@ class Thread {
     char* getName() { return (name); }
     void Print() { cout << name; }
     void SelfTest();		// test whether thread impl is working
+    
+    
+    std::map<int, std::string> *openFiles;
+    
+    void closeOpenFileById(int);
 
   private:
     // some of the private data for this class is listed above

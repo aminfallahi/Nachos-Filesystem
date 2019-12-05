@@ -111,7 +111,7 @@ typedef int OpenFileId;
 /* Create a Nachos file, with name "name" */
 /* Note: Create does not open the file.   */
 /* Return 1 on success, negative error code on failure */
-int Create(char *name);
+int Create(char *name, int protection, int size);
 
 /* Remove a Nachos file, with name "name" */
 int Remove(char *name);
@@ -119,7 +119,7 @@ int Remove(char *name);
 /* Open the Nachos file "name", and return an "OpenFileId" that can 
  * be used to read and write to the file.
  */
-OpenFileId Open(char *name);
+OpenFileId Open(char *name, int mode);
 
 /* Write "size" bytes from "buffer" to the open file. 
  * Return the number of bytes actually read on success.

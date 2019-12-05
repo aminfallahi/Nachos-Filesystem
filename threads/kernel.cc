@@ -101,6 +101,11 @@ Kernel::Initialize()
     synchConsoleIn = new SynchConsoleInput(consoleIn); // input from stdin
     synchConsoleOut = new SynchConsoleOutput(consoleOut); // output to stdout
     synchDisk = new SynchDisk();    //
+    openFiles = new std::map<int, OpenFile*>;
+    semReads =  new std::map<int,Semaphore*>;
+    semWrites = new std::map<int,Semaphore*>;
+    readerCount= new std::map<int,int>;
+
 #ifdef FILESYS_STUB
     fileSystem = new FileSystem();
 #else
@@ -242,3 +247,14 @@ Kernel::NetworkTest() {
     // Then we're done!
 }
 
+OpenFile* Kernel::findOpenFileById(int fileId) {
+    return openFiles->find(fileId)->second;
+}
+
+void Kernel::closeOpenFileById(int fileId){
+    semReads->at(fileId)->P();
+    semWrites->at(fileId)->P();
+    openFiles->erase(fileId);
+    semWrites->at(fileId)->V();
+    semReads->at(fileId)->V();
+}

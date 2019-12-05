@@ -99,13 +99,13 @@ Copy(char *from, char *to)
 
 // Create a Nachos file of the same length
     DEBUG('f', "Copying file " << from << " of size " << fileLength <<  " to file " << to);
-    if (!kernel->fileSystem->Create(to, fileLength)) {   // Create Nachos file
+    if (!kernel->fileSystem->Create(to, fileLength, 111)) {   // Create Nachos file
         printf("Copy: couldn't create output file %s\n", to);
         Close(fd);
         return;
     }
     
-    openFile = kernel->fileSystem->Open(to);
+    openFile = kernel->fileSystem->Open(to,1);
     ASSERT(openFile != NULL);
     
 // Copy the data in TransferSize chunks
@@ -133,7 +133,7 @@ Print(char *name)
     int i, amountRead;
     char *buffer;
 
-    if ((openFile = kernel->fileSystem->Open(name)) == NULL) {
+    if ((openFile = kernel->fileSystem->Open(name,1)) == NULL) {
         printf("Print: unable to open file %s\n", name);
         return;
     }

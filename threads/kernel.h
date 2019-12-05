@@ -18,12 +18,14 @@
 #include "alarm.h"
 #include "filesys.h"
 #include "machine.h"
+#include <map>
 
 class PostOfficeInput;
 class PostOfficeOutput;
 class SynchConsoleInput;
 class SynchConsoleOutput;
 class SynchDisk;
+class Semaphore;
 
 class Kernel {
   public:
@@ -58,7 +60,13 @@ class Kernel {
     PostOfficeOutput *postOfficeOut;
 
     int hostName;               // machine identifier
-
+    
+    std::map<int,OpenFile*> *openFiles;
+    OpenFile* findOpenFileById(int);
+    void closeOpenFileById(int);
+    std::map<int,Semaphore*> *semReads;
+    std::map<int,Semaphore*> *semWrites;
+    std::map<int,int> *readerCount;
   private:
     bool randomSlice;		// enable pseudo-random time slicing
     bool debugUserProg;         // single step user program
